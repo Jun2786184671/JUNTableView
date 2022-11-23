@@ -39,14 +39,14 @@ pod 'JUNTableView'
 ```
 ```objc
 [UITableView jun_tableViewWithForEach:aStringArray 
-					      itemBuilder:^UIView *(NSUInteger index, id element) {
-    if ([element isEqual:@"text"]) {
-        return aUILabel;
-    } else if ([element isEqual:@"button"]) {
-    	return aUIButton;
-    } else {
-    	// Fall on other conditions...
-    }
+	itemBuilder:^UIView *(NSUInteger index, id element) {
+	if ([element isEqual:@"text"]) {
+	    return aUILabel;
+	} else if ([element isEqual:@"button"]) {
+		return aUIButton;
+	} else {
+		// Fall on other conditions...
+	}
 }];
 ```
 ```objc
