@@ -26,6 +26,13 @@
 @implementation JUNTableViewProxy
 @synthesize target = _target;
 
+- (instancetype)initWithFrame:(CGRect)frame {
+    if (self = [super initWithFrame:frame]) {
+        _target = nil;
+    }
+    return self;
+}
+
 - (instancetype)initWithItemsBuiler:(NSArray<UIView *> *(^)(void))itemsBuilder {
     if (self = [self init]) {
         _builder = [[JUNTableViewStaticBuilder alloc] initWithItemsBuilder:itemsBuilder];
