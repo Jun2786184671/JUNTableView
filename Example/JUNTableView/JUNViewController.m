@@ -29,11 +29,18 @@
     UISwitch *aSwitch = [[UISwitch alloc] init];
     
     UITableView *tableView =
-    [UITableView jun_tableViewWithItems:@[
-        aLabel,
-        aButton,
-        aSwitch,
-    ]];
+//    [UITableView jun_tableViewWithItems:@[
+//        aLabel,
+//        aButton,
+//        aSwitch,
+//    ]];
+    
+    [UITableView jun_tableViewWithItemCount:1000 itemBuilder:^UIView * _Nonnull(NSUInteger index) {
+        UILabel *aLabel = [[UILabel alloc] init];
+        aLabel.text = [NSString stringWithFormat:@"label%lu", index];
+        aLabel.textColor = [UIColor blackColor];
+        return aLabel;
+    }];
     
     tableView.jun_alignment = -1;
     tableView.frame = self.view.bounds;
