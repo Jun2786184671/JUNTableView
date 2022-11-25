@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface JUNTableViewProxy : UIView
 
 - (instancetype)initWithItemsBuiler:(NSArray<UIView *> *(^)(void))itemsBuilder;
-- (instancetype)initWithItemCountBuilder:(NSUInteger (^)(void))itemCountBuilder itemBuilder:(UIView *(^)(NSUInteger index))itemBuilder;
+- (instancetype)initWithItemCountBuilder:(NSUInteger (^)(void))countBuilder itemBuilder:(UIView *(^)(NSUInteger index))itemBuilder;
 
 @end
 

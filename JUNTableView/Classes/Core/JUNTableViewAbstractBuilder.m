@@ -42,13 +42,16 @@ static NSString *cellReuseId = @"cell";
 }
 
 - (bool)_itemHasWidthConstraint:(UIView *)item {
-    bool hasWidthConstraint = false;
     for (NSLayoutConstraint *constraint in item.constraints) {
         if (constraint.firstItem != item) continue;
         if (constraint.firstAttribute != NSLayoutAttributeWidth) continue;
-        hasWidthConstraint = true;
+        return true;
     }
-    return hasWidthConstraint;
+    if (item.frame.size.width == 0.0f) {
+        [item sizeToFit];
+    }
+    NSParameterAssert(item.frame.size.width >= 0.0f);
+    return item.frame.size.width > 0.0f;
 }
 
 - (void)_setUpCellConstraintsByAlignment:(UITableViewCell *)cell item:(UIView *)item {

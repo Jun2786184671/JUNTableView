@@ -43,12 +43,12 @@
 - (UITableView *)target {
     if (_target == nil) {
         _target = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStyleGrouped];
-        [self _setUpWrappedInstance];
+        [self _setUpTarget];
     }
     return _target;
 }
 
-- (void)_setUpWrappedInstance {
+- (void)_setUpTarget {
     _target.translatesAutoresizingMaskIntoConstraints = false;
     _target.backgroundColor = [UIColor clearColor];
     _target.separatorStyle = UITableViewCellSeparatorStyleNone;
@@ -71,6 +71,16 @@
 - (void)setJun_indent:(CGFloat)indent {
     _jun_indent = indent;
     _builder.indent = indent;
+}
+
+- (void)setDelegate:(id<UITableViewDelegate>)delegate {
+    _delegate = delegate;
+    self.target.delegate = self;
+}
+
+- (void)setDataSource:(id<UITableViewDataSource>)dataSource {
+    _dataSource = dataSource;
+    self.target.dataSource = self;
 }
 
 - (void)didMoveToSuperview {
