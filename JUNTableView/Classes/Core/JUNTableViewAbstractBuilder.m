@@ -28,17 +28,31 @@ static NSString *cellReuseId = @"cell";
 
 - (void)_setUpCell:(UITableViewCell *)cell forIndexPath:(NSIndexPath *)indexPath {
     NSParameterAssert(indexPath.section == 0);
-    for (UIView *view in cell.contentView.subviews) {
-        [view removeFromSuperview];
-    }
+    NSAssert([cell.contentView.subviews count] <= 1, @"assert only one wrapped item view in cell content view");
+    UIView *prevWrappedItem = [cell.contentView.subviews lastObject];
+    [prevWrappedItem removeFromSuperview];
     UIView *item = [self _getItemForIndexPath:indexPath];
-    item.translatesAutoresizingMaskIntoConstraints = false;
+    item = [self _wrappedItem:item];
     [cell.contentView addSubview:item];
     if ([self _itemHasWidthConstraint:item]) {
         [self _setUpCellConstraintsByAlignment:cell item:item];
     } else {
         [self _setUpCellConstraintsByDefault:cell item:item];
     }
+}
+
+- (UIView *)_wrappedItem:(UIView *)item {
+    item.translatesAutoresizingMaskIntoConstraints = false;
+    UIView *itemWrapper = [[UIView alloc] init];
+    itemWrapper.translatesAutoresizingMaskIntoConstraints = false;
+    [itemWrapper addSubview:item];
+    [itemWrapper addConstraints:@[
+        [NSLayoutConstraint constraintWithItem:item attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:itemWrapper attribute:NSLayoutAttributeTop multiplier:1.0f constant:0.0f],
+        [NSLayoutConstraint constraintWithItem:item attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:itemWrapper attribute:NSLayoutAttributeBottom multiplier:1.0f constant:0.0f],
+        [NSLayoutConstraint constraintWithItem:item attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:itemWrapper attribute:NSLayoutAttributeLeading multiplier:1.0f constant:0.0f],
+        [NSLayoutConstraint constraintWithItem:item attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual toItem:itemWrapper attribute:NSLayoutAttributeTrailing multiplier:1.0f constant:0.0f],
+    ]];
+    return itemWrapper;
 }
 
 - (bool)_itemHasWidthConstraint:(UIView *)item {
