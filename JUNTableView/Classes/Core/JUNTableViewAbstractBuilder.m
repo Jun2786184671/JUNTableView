@@ -28,11 +28,14 @@ static NSString *cellReuseId = @"cell";
 
 - (void)_setUpCell:(UITableViewCell *)cell forIndexPath:(NSIndexPath *)indexPath {
     NSParameterAssert(indexPath.section == 0);
-    NSAssert([cell.contentView.subviews count] <= 1, @"assert only one wrapped item view in cell content view");
-    UIView *prevWrappedItem = [cell.contentView.subviews lastObject];
-    [prevWrappedItem removeFromSuperview];
+//    NSAssert([cell.contentView.subviews count] <= 1, @"assert only one wrapped item view in cell content view");
+//    UIView *prevWrappedItem = [cell.contentView.subviews lastObject];
+//    [prevWrappedItem removeFromSuperview];
+    for (UIView *view in cell.contentView.subviews) {
+        [view removeFromSuperview];
+    }
     UIView *item = [self _getItemForIndexPath:indexPath];
-    item = [self _wrappedItem:item];
+    item = [self _wrapItem:item];
     [cell.contentView addSubview:item];
     if ([self _itemHasWidthConstraint:item]) {
         [self _setUpCellConstraintsByAlignment:cell item:item];
@@ -41,7 +44,7 @@ static NSString *cellReuseId = @"cell";
     }
 }
 
-- (UIView *)_wrappedItem:(UIView *)item {
+- (UIView *)_wrapItem:(UIView *)item {
     item.translatesAutoresizingMaskIntoConstraints = false;
     UIView *itemWrapper = [[UIView alloc] init];
     itemWrapper.translatesAutoresizingMaskIntoConstraints = false;
