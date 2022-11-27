@@ -47,11 +47,24 @@ static NSString *cellReuseId = @"cell";
         if (constraint.firstAttribute != NSLayoutAttributeWidth) continue;
         return true;
     }
-    if (item.frame.size.width == 0.0f) {
+    CGRect frame = item.frame;
+    CGFloat itemW = frame.size.width;
+    if (itemW == 0.0f) {
+        CGFloat itemH = frame.size.height;
         [item sizeToFit];
+        itemH = itemH > 0.0f ? itemH : item.frame.size.height;
+        itemW = item.frame.size.width;
+        frame.size.width = itemW;
+        frame.size.height = itemH;
+        item.frame = frame;
     }
-    NSParameterAssert(item.frame.size.width >= 0.0f);
-    return item.frame.size.width > 0.0f;
+    NSParameterAssert(itemW >= 0.0f);
+    if (itemW > 0.0f) {
+        [item addConstraint:
+             [NSLayoutConstraint constraintWithItem:item attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0f constant:itemW]
+        ];
+    }
+    return itemW > 0.0f;
 }
 
 - (void)_setUpCellConstraintsByAlignment:(UITableViewCell *)cell item:(UIView *)item {
@@ -80,7 +93,12 @@ static NSString *cellReuseId = @"cell";
 }
 
 - (void)_setUpCellCommonConstraints:(UITableViewCell *)cell item:(UIView *)item {
-    
+    CGFloat itemH = item.frame.size.height;
+    if (itemH > 0.0f) {
+        [item addConstraint:
+             [NSLayoutConstraint constraintWithItem:item attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0f constant:itemH]
+        ];
+    }
     NSLayoutConstraint *bottomConstraint = [NSLayoutConstraint constraintWithItem:item attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:cell.contentView attribute:NSLayoutAttributeBottom multiplier:1.0f constant:-self.itemSpacing * 0.5];
     bottomConstraint.priority = UILayoutPriorityRequired - 1;
     [cell.contentView addConstraints:@[

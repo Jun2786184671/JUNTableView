@@ -28,19 +28,24 @@
     [aButton setTitleColor:[UIColor blueColor] forState:UIControlStateNormal];
     UISwitch *aSwitch = [[UISwitch alloc] init];
     
-    UITableView *tableView =
-//    [UITableView jun_tableViewWithItems:@[
-//        aLabel,
-//        aButton,
-//        aSwitch,
-//    ]];
+    UIView *aView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 80, 1000)];
+    aView.backgroundColor = [UIColor orangeColor];
     
-    [UITableView jun_tableViewWithItemCount:1000 itemBuilder:^UIView * _Nonnull(NSUInteger index) {
-        UILabel *aLabel = [[UILabel alloc] init];
-        aLabel.text = [NSString stringWithFormat:@"label%lu", index];
-        aLabel.textColor = [UIColor blackColor];
-        return aLabel;
-    }];
+    UITableView *tableView =
+    [UITableView jun_tableViewWithItems:@[
+        aLabel,
+        aButton,
+        aSwitch,
+        aView,
+    ]];
+//    tableView.rowHeight = 20;
+    
+//    [UITableView jun_tableViewWithItemCount:1000 itemBuilder:^UIView * _Nonnull(NSUInteger index) {
+//        UILabel *aLabel = [[UILabel alloc] init];
+//        aLabel.text = [NSString stringWithFormat:@"label%lu", index];
+//        aLabel.textColor = [UIColor blackColor];
+//        return aLabel;
+//    }];
     
     tableView.jun_alignment = -1;
     tableView.frame = self.view.bounds;
