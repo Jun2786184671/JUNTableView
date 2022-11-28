@@ -13,8 +13,8 @@
 
 @interface JUNTableViewProxy () <UITableViewDelegate, UITableViewDataSource>
 
-@property(nonatomic, strong, readonly) UITableView *target;
-@property(nonatomic, strong, readonly) JUNTableViewAbstractBuilder *builder;
+@property(nonatomic, strong) UITableView *target;
+@property(nonatomic, strong) JUNTableViewAbstractBuilder *builder;
 @property(nonatomic, assign) JUNTableViewItemAlignment jun_alignment;
 @property(nonatomic, assign) CGFloat jun_itemSpacing;
 @property(nonatomic, assign) CGFloat jun_indent;
@@ -28,21 +28,21 @@
 
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
-        _target = nil;
+        self.target = nil;
     }
     return self;
 }
 
 - (instancetype)initWithItemsBuiler:(NSArray<UIView *> *(^)(void))itemsBuilder {
     if (self = [self init]) {
-        _builder = [[JUNTableViewStaticBuilder alloc] initWithItemsBuilder:itemsBuilder];
+        self.builder = [[JUNTableViewStaticBuilder alloc] initWithItemsBuilder:itemsBuilder];
     }
     return self;
 }
 
 - (instancetype)initWithItemCountBuilder:(NSUInteger (^)(void))countBuilder itemBuilder:(UIView *(^)(NSUInteger))itemBuilder {
     if (self = [self init]) {
-        _builder = [[JUNTableViewDynamicBuilder alloc] initWithItemCountBuilder:countBuilder itemBuilder:itemBuilder];
+        self.builder = [[JUNTableViewDynamicBuilder alloc] initWithItemCountBuilder:countBuilder itemBuilder:itemBuilder];
     }
     return self;
 }
@@ -56,28 +56,31 @@
 }
 
 - (void)_setUpTarget {
-    _target.translatesAutoresizingMaskIntoConstraints = false;
-    _target.backgroundColor = [UIColor clearColor];
-    _target.separatorStyle = UITableViewCellSeparatorStyleNone;
+    if (@available(iOS 11.0, *)) {
+        self.target.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+    }
+    self.target.translatesAutoresizingMaskIntoConstraints = false;
+    self.target.backgroundColor = [UIColor clearColor];
+    self.target.separatorStyle = UITableViewCellSeparatorStyleNone;
     UIView *sizeBox = [[UIView alloc] init];
     sizeBox.frame = CGRectMake(0, 0, 0, CGFLOAT_MIN);
-    _target.tableHeaderView = sizeBox;
-    _target.tableFooterView = sizeBox;
+    self.target.tableHeaderView = sizeBox;
+    self.target.tableFooterView = sizeBox;
 }
 
 - (void)setJun_alignment:(JUNTableViewItemAlignment)alignment {
     _jun_alignment = alignment;
-    _builder.alignment = alignment;
+    self.builder.alignment = alignment;
 }
 
 - (void)setJun_itemSpacing:(CGFloat)itemSpacing {
     _jun_itemSpacing = itemSpacing;
-    _builder.itemSpacing = itemSpacing;
+    self.builder.itemSpacing = itemSpacing;
 }
 
 - (void)setJun_indent:(CGFloat)indent {
     _jun_indent = indent;
-    _builder.indent = indent;
+    self.builder.indent = indent;
 }
 
 - (void)setDelegate:(id<UITableViewDelegate>)delegate {

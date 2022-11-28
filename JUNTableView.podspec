@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'JUNTableView'
-  s.version          = '0.1.4'
+  s.version          = '0.1.5'
   s.summary          = 'An extension to UITableView that makes creating tableviews efficiently and gracefully.'
 
 # This description is used to generate tags and improve search results.
