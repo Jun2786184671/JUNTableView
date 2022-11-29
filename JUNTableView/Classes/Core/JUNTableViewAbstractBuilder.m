@@ -28,23 +28,58 @@ static NSString *cellReuseId = @"cell";
 
 - (void)_setUpCell:(UITableViewCell *)cell forIndexPath:(NSIndexPath *)indexPath {
     NSParameterAssert(indexPath.section == 0);
-//    NSAssert([cell.contentView.subviews count] <= 1, @"assert only one wrapped item view in cell content view");
-//    UIView *prevWrappedItem = [cell.contentView.subviews lastObject];
-//    [prevWrappedItem removeFromSuperview];
-    for (UIView *view in cell.contentView.subviews) {
-        [view removeFromSuperview];
+    
+    for (UIView *subview in cell.contentView.subviews) {
+        [subview removeFromSuperview];
     }
+    
     UIView *item = [self _getItemForIndexPath:indexPath];
-    item = [self _wrapItem:item];
-    [cell.contentView addSubview:item];
-    if ([self _itemHasWidthConstraint:item]) {
-        [self _setUpCellConstraintsByAlignment:cell item:item];
+    
+    UIView *itemWrapper = [self _wrappedItem:item];
+    [cell.contentView addSubview:itemWrapper];
+    
+    CGFloat itemW = item.frame.size.width;
+    CGFloat itemH = item.frame.size.height;
+    
+    [cell.contentView addConstraints:@[
+        [NSLayoutConstraint constraintWithItem:itemWrapper attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationGreaterThanOrEqual toItem:cell.contentView attribute:NSLayoutAttributeLeading multiplier:1.0f constant:self.indent],
+        [NSLayoutConstraint constraintWithItem:itemWrapper attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationLessThanOrEqual toItem:cell.contentView attribute:NSLayoutAttributeTrailing multiplier:1.0f constant:-self.indent],
+        [NSLayoutConstraint constraintWithItem:itemWrapper attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:cell.contentView attribute:NSLayoutAttributeTop multiplier:1.0f constant:0.0f],
+        [NSLayoutConstraint constraintWithItem:itemWrapper attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:cell.contentView attribute:NSLayoutAttributeBottom multiplier:1.0f constant:0.0f],
+    ]];
+    
+    if (itemW) {
+        NSLayoutConstraint *wConstraint = [NSLayoutConstraint constraintWithItem:itemWrapper attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0f constant:itemW];
+        wConstraint.priority = UILayoutPriorityDefaultHigh;
+        [itemWrapper addConstraint:wConstraint];
+        
+        if (self.alignment == JUNTableViewItemAlignmentLeading) {
+            [cell.contentView addConstraint:
+                [NSLayoutConstraint constraintWithItem:itemWrapper attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:cell.contentView attribute:NSLayoutAttributeLeading multiplier:1.0f constant:self.indent]
+            ];
+        } else if (self.alignment == JUNTableViewItemAlignmentCenter) {
+            [cell.contentView addConstraint:
+                [NSLayoutConstraint constraintWithItem:item attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:cell.contentView attribute:NSLayoutAttributeCenterX multiplier:1.0f constant:0.0f]
+            ];
+        } else if (self.alignment == JUNTableViewItemAlignmentTrailing) {
+            [cell.contentView addConstraint:
+                [NSLayoutConstraint constraintWithItem:item attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual toItem:cell.contentView attribute:NSLayoutAttributeTrailing multiplier:1.0f constant:-self.indent]
+            ];
+        }
     } else {
-        [self _setUpCellConstraintsByDefault:cell item:item];
+        NSLayoutConstraint *wConstraint = [NSLayoutConstraint constraintWithItem:itemWrapper attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:cell.contentView attribute:NSLayoutAttributeWidth multiplier:1.0f constant:0.0f];
+        wConstraint.priority = UILayoutPriorityDefaultHigh;
+        [cell.contentView addConstraint:wConstraint];
+    }
+    
+    if (itemH) {
+        NSLayoutConstraint *hConstraint = [NSLayoutConstraint constraintWithItem:itemWrapper attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0f constant:itemH];
+        hConstraint.priority = UILayoutPriorityDefaultHigh;
+        [itemWrapper addConstraint:hConstraint];
     }
 }
 
-- (UIView *)_wrapItem:(UIView *)item {
+- (UIView *)_wrappedItem:(UIView *)item {
     item.translatesAutoresizingMaskIntoConstraints = false;
     UIView *itemWrapper = [[UIView alloc] init];
     itemWrapper.translatesAutoresizingMaskIntoConstraints = false;
@@ -56,72 +91,6 @@ static NSString *cellReuseId = @"cell";
         [NSLayoutConstraint constraintWithItem:item attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual toItem:itemWrapper attribute:NSLayoutAttributeTrailing multiplier:1.0f constant:0.0f],
     ]];
     return itemWrapper;
-}
-
-- (bool)_itemHasWidthConstraint:(UIView *)item {
-    for (NSLayoutConstraint *constraint in item.constraints) {
-        if (constraint.firstItem != item) continue;
-        if (constraint.firstAttribute != NSLayoutAttributeWidth) continue;
-        return true;
-    }
-    CGRect frame = item.frame;
-    CGFloat itemW = frame.size.width;
-    if (itemW == 0.0f) {
-        CGFloat itemH = frame.size.height;
-        [item sizeToFit];
-        itemH = itemH > 0.0f ? itemH : item.frame.size.height;
-        itemW = item.frame.size.width;
-        frame.size.width = itemW;
-        frame.size.height = itemH;
-        item.frame = frame;
-    }
-    NSParameterAssert(itemW >= 0.0f);
-    if (itemW > 0.0f) {
-        [item addConstraint:
-             [NSLayoutConstraint constraintWithItem:item attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0f constant:itemW]
-        ];
-    }
-    return itemW > 0.0f;
-}
-
-- (void)_setUpCellConstraintsByAlignment:(UITableViewCell *)cell item:(UIView *)item {
-    [self _setUpCellCommonConstraints:cell item:item];
-    if (self.alignment == JUNTableViewItemAlignmentLeading) {
-        [cell.contentView addConstraints:@[
-            [NSLayoutConstraint constraintWithItem:item attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:cell.contentView attribute:NSLayoutAttributeLeading multiplier:1.0f constant:self.indent],
-        ]];
-    } else if (self.alignment == JUNTableViewItemAlignmentCenter) {
-        [cell.contentView addConstraints:@[
-            [NSLayoutConstraint constraintWithItem:item attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:cell.contentView attribute:NSLayoutAttributeCenterX multiplier:1.0f constant:0.0f],
-        ]];
-    } else if (self.alignment == JUNTableViewItemAlignmentTrailing) {
-        [cell.contentView addConstraints:@[
-            [NSLayoutConstraint constraintWithItem:item attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual toItem:cell.contentView attribute:NSLayoutAttributeTrailing multiplier:1.0f constant:-self.indent],
-        ]];
-    }
-}
-
-- (void)_setUpCellConstraintsByDefault:(UITableViewCell *)cell item:(UIView *)item {
-    [self _setUpCellCommonConstraints:cell item:item];
-    [cell.contentView addConstraints:@[
-        [NSLayoutConstraint constraintWithItem:item attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:cell.contentView attribute:NSLayoutAttributeLeading multiplier:1.0f constant:self.indent],
-        [NSLayoutConstraint constraintWithItem:item attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual toItem:cell.contentView attribute:NSLayoutAttributeTrailing multiplier:1.0f constant:-self.indent],
-    ]];
-}
-
-- (void)_setUpCellCommonConstraints:(UITableViewCell *)cell item:(UIView *)item {
-    CGFloat itemH = item.frame.size.height;
-    if (itemH > 0.0f) {
-        [item addConstraint:
-             [NSLayoutConstraint constraintWithItem:item attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0f constant:itemH]
-        ];
-    }
-    NSLayoutConstraint *bottomConstraint = [NSLayoutConstraint constraintWithItem:item attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:cell.contentView attribute:NSLayoutAttributeBottom multiplier:1.0f constant:-self.itemSpacing * 0.5];
-    bottomConstraint.priority = UILayoutPriorityRequired - 1;
-    [cell.contentView addConstraints:@[
-        [NSLayoutConstraint constraintWithItem:item attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:cell.contentView attribute:NSLayoutAttributeTop multiplier:1.0f constant:self.itemSpacing * 0.5],
-        bottomConstraint,
-    ]];
 }
 
 #pragma mark - <UITableViewDataSource>
